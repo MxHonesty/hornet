@@ -2,7 +2,6 @@
     TOKEN TYPE indicators in bytes format.
 """
 
-
 # Start of int.
 TOKEN_INTEGER = b'i'
 

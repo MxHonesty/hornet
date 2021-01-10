@@ -8,7 +8,8 @@ from src.bencode.indicators import TOKEN_INTEGER, TOKEN_DICT, TOKEN_STRING_SEPAR
 
 class Decoder:
     """ Responsible for decoding a bencoded sequence of bytes.
-        Raises TypeError if data is not bytes. """
+        Raises TypeError if data is not bytes.
+    """
     def __init__(self, data: bytes):
         if not isinstance(data, bytes):
             raise TypeError("Argument data must be of type bytes")
@@ -17,6 +18,22 @@ class Decoder:
 
     def decode(self):
         """ Decode the data and return the python object. """
+        current_char = self._next_character()
+        if current_char is None:
+            raise EOFError("Unexpected EOF")
+        if current_char == TOKEN_INTEGER:
+            self._skip_character()
+            return self._decode_int()
+        elif current_char == TOKEN_LIST:
+            self._skip_character()
+            return self._decode_list()
+        elif current_char == TOKEN_DICT:
+            self._skip_character()
+            return self._decode_dict()
+        elif current_char in b'0123456789':
+            return self._decode_string()
+        else:
+            raise RuntimeError("Unsupported token found")
 
     def _next_character(self):
         """ Return the next character from the bencode data or None if nothing left. """
@@ -50,16 +67,25 @@ class Decoder:
 
     def _decode_int(self):
         """ Decode the current data as int. """
-        pass
+        return int(self._read_until(TOKEN_END))
 
     def _decode_list(self):
         """ Decode the current data as a list. """
-        pass
+        resulting_list = []
+        while self._index < len(self._data) - 1:
+            resulting_list.append(self.decode())
+        return resulting_list
 
     def _decode_dict(self):
         """ Decode the current data as a dict. """
-        pass
+        resulting_dict = OrderedDict()
+        while self._index < len(self._data) - 1:
+            key_object = self.decode()
+            value_object = self.decode()
+            resulting_dict[key_object] = value_object
+        return resulting_dict
 
     def _decode_string(self):
         """ Decode the current data as a string. """
-        pass
+        length = int(self._read_until(TOKEN_STRING_SEPARATOR))
+        return self._read(length)
