@@ -6,7 +6,7 @@ from collections import OrderedDict
 from src.bencode.indicators import TOKEN_INTEGER, TOKEN_DICT, TOKEN_STRING_SEPARATOR, TOKEN_END, TOKEN_LIST
 
 
-class Decoder:
+class Decoding:
     """ Responsible for decoding a bencoded sequence of bytes.
         Raises TypeError if data is not bytes.
     """
@@ -89,3 +89,14 @@ class Decoder:
         """ Decode the current data as a string. """
         length = int(self._read_until(TOKEN_STRING_SEPARATOR))
         return self._read(length)
+
+
+class Decoder:
+    """ Wrapper class for the Decoding functionality. """
+    @staticmethod
+    def decode(bencode: bytes):
+        """ Function that decodes the bencode into corresponding python object.
+            Input is bencode to be decoded as bytes.
+            Output can be list, OrderedDict, int, str.
+        """
+        return Decoding(bencode).decode()
