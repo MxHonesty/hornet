@@ -28,7 +28,7 @@ class Encoder:
         elif isinstance(value_to_encode, OrderedDict):
             return Encoder._encode_dict(value_to_encode)
         else:
-            raise ValueError("Type of value_to_encode not supported")
+            raise ValueError("Type {} of value_to_encode not supported".format(str(type(value_to_encode))))
 
     @staticmethod
     def _encode_int(value):
@@ -37,7 +37,7 @@ class Encoder:
             Format of the int bencode is i<value>e. Ex: i123e.
             This is returned as bytes type.
         """
-        res = TOKEN_INTEGER + bytes(value) + TOKEN_END
+        res = TOKEN_INTEGER + Encoder._convert_int_to_byte_string(value) + TOKEN_END
         return res
 
     @staticmethod
@@ -48,7 +48,7 @@ class Encoder:
             This is returned as bytes type.
         """
         length = len(value)
-        return bytes(length) + TOKEN_STRING_SEPARATOR + bytes(value)
+        return Encoder._convert_int_to_byte_string(length) + TOKEN_STRING_SEPARATOR + bytes(value, encoding="utf8")
 
     @staticmethod
     def _encode_list(list_value):
@@ -82,4 +82,36 @@ class Encoder:
         elif isinstance(value, str):
             return Encoder._encode_string(value)
         else:
-            raise ValueError("Value must be str or int.")
+            raise ValueError("Value must be str or int but {} was passed".format(str(type(value))))
+
+    @staticmethod
+    def _convert_int_to_byte_string(value_to_convert):
+        """ Convert an int value to a bytes string. """
+        if not isinstance(value_to_convert, int):
+            raise ValueError("value_to_convert must be int")
+        cifre = []
+        while value_to_convert:
+            cifre.append(value_to_convert % 10)
+            value_to_convert //= 10
+        cifre.reverse()
+        res = b''
+        for el in cifre:
+            if el == 1:
+                res += b'1'
+            elif el == 2:
+                res += b'2'
+            elif el == 3:
+                res += b'3'
+            elif el == 4:
+                res += b'4'
+            elif el == 5:
+                res += b'5'
+            elif el == 6:
+                res += b'6'
+            elif el == 7:
+                res += b'7'
+            elif el == 8:
+                res += b'8'
+            elif el == 9:
+                res += b'9'
+        return res

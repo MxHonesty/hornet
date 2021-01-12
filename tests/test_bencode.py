@@ -31,9 +31,11 @@ class TestEncoder(unittest.TestCase):
         int_test = 123
         string_test = "salut"
         list_test = [123, 321, "salut"]
-        dict_test = OrderedDict([(b'salut', b'nusunt'), (b'eus', b'eggs')])
+        dict_test = OrderedDict([("salut", "nusunt"), ("eus", "eggs")])
+        dict_test2 = OrderedDict([(123, "salut"), (132, 32)])
 
-        self.assertEqual(Encoder().encode(int_test), b'i123e')
-        self.assertEqual(Encoder().encode(string_test), b'5:salut')
-        self.assertEqual(Encoder().encode(list_test), b'li123ei321e5:salute')
-        self.assertEqual(Encoder().encode(dict_test), b'd5:salut6:nusunt3:eus4:eggse')
+        self.assertEqual(Encoder.encode(int_test), b'i123e')
+        self.assertEqual(Encoder.encode(string_test), b'5:salut')
+        self.assertEqual(Encoder.encode(list_test), b'li123ei321e5:salute')
+        self.assertEqual(Encoder.encode(dict_test), b'd5:salut6:nusunt3:eus4:eggse')
+        self.assertEqual(Encoder.encode())
