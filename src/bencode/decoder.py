@@ -3,7 +3,7 @@
 """
 from collections import OrderedDict
 
-from src.bencode.indicators import TOKEN_INTEGER, TOKEN_DICT, TOKEN_STRING_SEPARATOR, TOKEN_END, TOKEN_LIST
+from .indicators import TOKEN_INTEGER, TOKEN_DICT, TOKEN_STRING_SEPARATOR, TOKEN_END, TOKEN_LIST
 
 
 class Decoding:
@@ -33,7 +33,7 @@ class Decoding:
         elif current_char in b'0123456789':
             return self._decode_string()
         else:
-            raise RuntimeError("Unsupported token found")
+            raise RuntimeError("Unsupported token found {}".format(str(current_char)))
 
     def _next_character(self):
         """ Return the next character from the bencode data or None if nothing left. """
@@ -72,17 +72,19 @@ class Decoding:
     def _decode_list(self):
         """ Decode the current data as a list. """
         resulting_list = []
-        while self._index < len(self._data) - 1:
+        while self._data[self._index:self._index + 1] != TOKEN_END:
             resulting_list.append(self.decode())
+        self._skip_character()
         return resulting_list
 
     def _decode_dict(self):
         """ Decode the current data as a dict. """
         resulting_dict = OrderedDict()
-        while self._index < len(self._data) - 1:
+        while self._data[self._index:self._index + 1] != TOKEN_END:
             key_object = self.decode()
             value_object = self.decode()
             resulting_dict[key_object] = value_object
+        self._skip_character()
         return resulting_dict
 
     def _decode_string(self):

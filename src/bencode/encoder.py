@@ -3,7 +3,7 @@
 """
 from collections import OrderedDict
 
-from src.bencode.indicators import TOKEN_END, TOKEN_INTEGER, TOKEN_DICT, TOKEN_LIST, TOKEN_STRING_SEPARATOR
+from .indicators import TOKEN_END, TOKEN_INTEGER, TOKEN_DICT, TOKEN_LIST, TOKEN_STRING_SEPARATOR
 
 
 class Encoder:
@@ -21,7 +21,7 @@ class Encoder:
         """
         if isinstance(value_to_encode, int):
             return Encoder._encode_int(value_to_encode)
-        elif isinstance(value_to_encode, str):
+        elif isinstance(value_to_encode, bytes):
             return Encoder._encode_string(value_to_encode)
         elif isinstance(value_to_encode, list):
             return Encoder._encode_list(value_to_encode)
@@ -48,12 +48,12 @@ class Encoder:
             This is returned as bytes type.
         """
         length = len(value)
-        return Encoder._convert_int_to_byte_string(length) + TOKEN_STRING_SEPARATOR + bytes(value, encoding="utf8")
+        return Encoder._convert_int_to_byte_string(length) + TOKEN_STRING_SEPARATOR + value
 
     @staticmethod
     def _encode_list(list_value):
         """ Returns the bencode for the given list. """
-        res = b'l'
+        res = TOKEN_LIST
         new_elem = None
         for el in list_value:
             new_elem = Encoder._convert_base(el)
@@ -63,7 +63,7 @@ class Encoder:
     @staticmethod
     def _encode_dict(dict_value):
         """ Returns the bencode for the given dict. """
-        res = b'd'
+        res = TOKEN_DICT
         for key in dict_value:
             new_key = Encoder._convert_base(key)
             new_object = Encoder._convert_base(dict_value[key])
@@ -79,7 +79,7 @@ class Encoder:
         """
         if isinstance(value, int):
             return Encoder._encode_int(value)
-        elif isinstance(value, str):
+        elif isinstance(value, bytes):
             return Encoder._encode_string(value)
         else:
             raise ValueError("Value must be str or int but {} was passed".format(str(type(value))))
