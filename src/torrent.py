@@ -3,8 +3,9 @@
 """
 from hashlib import sha1
 
-from bencode.decoder import Decoder
-from bencode.encoder import Encoder
+from src.errors import TorrentReadError
+from src.bencode.decoder import Decoder
+from src.bencode.encoder import Encoder
 
 
 class TorrentFile:
@@ -20,12 +21,15 @@ class Torrent:
         self.filename = filename
         self.files = []
 
-        with open(self.filename, 'rb') as f:
-            information = f.read()
-            self.data = Decoder.decode(information)
-            info = Encoder.encode(self.data[b'info'])
-            self.info_hash = sha1(info).digest()
-            self._identify_files()  # Identify files in meta-data.
+        try:
+            with open(self.filename, 'rb') as f:
+                information = f.read()
+                self.data = Decoder.decode(information)
+                info = Encoder.encode(self.data[b'info'])
+                self.info_hash = sha1(info).digest()
+                self._identify_files()  # Identify files in meta-data.
+        except OSError:
+            raise TorrentReadError(filename)
 
     def _identify_files(self):
         self.files.append(TorrentFile(self.data[b'info'][b'name'].decode('utf-8'),
@@ -43,6 +47,7 @@ class Torrent:
 
     @property
     def output_file(self):
+        """ Returns the name of the output file as utf-8 encoded string. """
         return self.data[b'info'][b'name'].decode('utf-8')
 
     def __str__(self):
@@ -53,6 +58,3 @@ class Torrent:
                               self.data[b'info'][b'length'],
                               self.data[b'announce'],
                               self.info_hash)
-
-
-tor = Torrent("test.torrent")
