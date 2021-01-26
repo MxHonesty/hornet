@@ -11,7 +11,7 @@ from src.torrent import Torrent
 class TesTorrent(unittest.TestCase):
 
     def setUp(self):
-        self.tor = Torrent("test.torrent")
+        self.tor = Torrent("tests/test.torrent")
 
     def test_properties(self):
         property_error = "Torrent metadata read error"
@@ -26,4 +26,4 @@ class TesTorrent(unittest.TestCase):
         self.assertEqual(self.tor.info_hash, hash_info, msg=property_error)
 
     def test_read(self):
-        self.assertRaises(TorrentReadError, lambda: Torrent("nonexistent.torrent"), msg="Check if error raised")
+        self.assertRaises(TorrentReadError, lambda: Torrent("nonexistent.torrent"))
